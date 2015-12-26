@@ -16,7 +16,9 @@ class Taxer(object):
 
     def _CA_tax_brackets(self):
         """Return CA tax brackets.
-        Source: http://www.bankrate.com/finance/taxes/state-taxes-california.aspx
+
+        Source: http://www.bankrate.com/finance/taxes/state-taxes-california.aspx (2015)
+
         1 percent on the first $7,749 of taxable income.
         2 percent on taxable income between $7,750 and $18,371.
         4 percent on taxable income between $18,372 and $28,995.
@@ -137,16 +139,17 @@ class Taxer(object):
 
     def _federal_tax_brackets(self):
         """Return the federal tax brackets.
-        Source: http://www.efile.com/tax-service/tax-calculator/tax-brackets/
-        (2015)
-        Tax Rate   Single               Married/Joint&Widow(er) Married/Separate     Head of Household
-        10%        $1 - $9,225          $1 - $18,450            $1 - $9,225          $1 - $13,150
-        15%        $9,226 to $37,450    $18,451 to $74,900      $9,226 to $37,450    $13,151 to $50,200
-        25%        $37,451 to $90,750   $74,901 to $151,200     $37,451 to $75,600   $50,201 to $129,600
-        28%        $90,751 to $189,300  $151,201 to $230,450    $75,601 to $115,225  $129,601 to $209,850
-        33%        $189,301 to $411,500 $230,451 to $411,500    $115,226 to $205,750 $209,851 to $411,500
-        35%        $411,501 to $413,200 $411,501 to $464,850    $205,751 to $232,425 $411,501 to $439,200
-        39.6%      over $413,200        over $464,850           over $232,425        over $439,200
+
+        Source: http://www.efile.com/tax-service/tax-calculator/tax-brackets/   (2015)
+
+        Tax Rate   Single                           Married/Joint&Widow(er) Married/Separate          Head of Household
+        10%          $1 - $9,225                 $1 - $18,450               $1 - $9,225                 $1 - $13,150
+        15%          $9,226 to $37,450       $18,451 to $74,900     $9,226 to $37,450       $13,151 to $50,200
+        25%          $37,451 to $90,750     $74,901 to $151,200   $37,451 to $75,600     $50,201 to $129,600
+        28%          $90,751 to $189,300   $151,201 to $230,450 $75,601 to $115,225   $129,601 to $209,850
+        33%          $189,301 to $411,500 $230,451 to $411,500 $115,226 to $205,750 $209,851 to $411,500
+        35%          $411,501 to $413,200 $411,501 to $464,850 $205,751 to $232,425 $411,501 to $439,200
+        39.6%       over $413,200              over $464,850             over $232,425              over $439,200
         """
         single = OrderedDict()
         single[(1, 9225)] = FED_L1
