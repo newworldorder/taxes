@@ -12,10 +12,10 @@ This module computes federal taxes and state taxes for a given gross salary.
 
 # Data Structures
 
-- `federal_brakets` is a dictionary where the key corresponds to a `status` (see `status` below) which returns another dictionary of brackets where keys correpsonds to dollar ranges, and the values correspond to the percentage of tax for that range. 
+- `federal_brackets` is a dictionary where the key corresponds to a `status` (see `status` below) which returns another dictionary of brackets where keys correpsonds to dollar ranges, and the values correspond to the percentage of tax for that range. 
 - `gross_income` is a float
 - `status` is the federal income tax classification asscociated with the gross income, which is one of the following: "Single", "Joint", "Separate", and "Head" (for head of household).  
-- `state_brakets` is a dictionary where the key is a tuple of two items, the low end of the bracket and the high end of the bracket and value is a float representing the tax percentage
+- `state_brackets` is a dictionary where the key is a tuple of two items, the low end of the bracket and the high end of the bracket and value is a float representing the tax percentage
 
 
 
