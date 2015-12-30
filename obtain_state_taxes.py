@@ -14,6 +14,7 @@ if __name__ == '__main__':
         row = '|'.join(tds_text)
         acc += row + '\n'
     acc = acc[:acc.rfind('|||||||||||')]
+
     # output to a file 
     with open('state_tax_parsed.output', 'w') as f:
         f.write(acc.encode('utf8'))
