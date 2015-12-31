@@ -8,11 +8,12 @@ if __name__ == '__main__':
     # parse content of interest 
     tbody = BeautifulSoup(r.content, 'html.parser')
     trs = tbody.find_all('tr')
-    acc = ''
+    acc = []
     for tr in trs:
         tds_text = [td.text for td in tr.find_all('td')]
         row = '|'.join(tds_text)
-        acc += row + '\n'
+        acc.append(row)
+    acc = '\n'.join(acc)
     acc = acc[:acc.rfind('|||||||||||')]
 
     # output to a file 
