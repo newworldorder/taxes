@@ -1,4 +1,5 @@
 from collections import OrderedDict 
+import cPickle 
 import sys 
 
 ODD_BALLS = set(['Ill.', 'Colo.', 'Mich.', 'Ind.'])
@@ -90,3 +91,5 @@ if __name__ == '__main__':
         print ''
         print k 
         print s_dict[k]
+
+    cPickle.dump(s_dict, open('state_taxes.pkl', 'w'))

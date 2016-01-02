@@ -8,6 +8,10 @@ __pycache__/
 # emacs 
 *~
 
+# ouptut files
+*.pkl
+*.output
+
 # Distribution / packaging
 .Python
 env/

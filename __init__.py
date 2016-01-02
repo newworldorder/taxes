@@ -1,4 +1,6 @@
 from collections import OrderedDict
+import cPickle
+import os  
 import sys
 
 FED_L1 = .1
@@ -13,6 +15,9 @@ class Taxer(object):
     def __init__(self):
         self.federal_brackets = self._federal_tax_brackets()
         self.state_brackets = self._CA_tax_brackets()
+        pkl_file = 'state_taxes.pkl'
+        if os.path.exists(pkl_file):
+            self.states_taxes = cPickle.load(open(pkl_file))
 
     def _CA_tax_brackets(self):
         """Return CA tax brackets.
@@ -80,6 +85,18 @@ class Taxer(object):
         total_tax = self.federal_tax(gross_income, status) + self.state_tax(gross_income)
         return gross_income - total_tax
 
+    def set_state_status(self, state, status):
+        state_map = {}
+        if state not in self.states_taxes:
+            print state + ' does not exist'
+            return False
+        state_map = self.states_taxes[state]
+
+        if status not in state_map:
+            print status + 'does not exist'
+            return False
+        self.state_brackets = state_map[status]
+
     def state_tax(self, gross_income):
         """Comptue state tax for `gross_income`.
 
@@ -112,6 +129,8 @@ class Taxer(object):
         """
         done = False
         acc = 0
+        if 'None' == brackets:
+            return acc 
         for (low, high) in brackets.keys():
             if gross_income <= high:
                 done = True
@@ -197,6 +216,7 @@ class Taxer(object):
 
 if __name__ == '__main__':
     t = Taxer()
+    t.set_state_status('Tex.', 'Single')
     salary = 130000
     net_income = t.net_income(salary, 'Single')
     print 'Annual Net Income:', net_income
