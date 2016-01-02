@@ -78,12 +78,12 @@ if __name__ == '__main__':
             continue 
         (single, married) = states[k]
         if no_vals(single[0]):
-            s_dict[k] = {"Single":"None", "Married":"None"}
+            s_dict[k] = {"Single":"None", "Joint":"None"}
             continue 
         s = make_brackets(single)
         d["Single"] = s
         m = make_brackets(married)
-        d["Married"] = m
+        d["Joint"] = m
         s_dict[k] = d 
     
     for k in s_dict.keys():
