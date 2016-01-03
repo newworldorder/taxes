@@ -2,7 +2,16 @@ from collections import OrderedDict
 import cPickle 
 import sys 
 
+# Colo. 4.63% of federal taxable income 
+# Ind. 3.3% of federal taxable income 
+# Ill. 3.75% of federal taxable income 
+# Mich. 4.25% of adjusted gross income with modification 
+
 ODD_BALLS = set(['Ill.', 'Colo.', 'Mich.', 'Ind.'])
+
+def make_flat_tax(tax_rate):
+    return {'Single':{(0, sys.maxint): tax_rate}, 
+            'Joint':{(0, sys.maxint): tax_rate}}
 
 def no_vals(vals):
     return all(map(lambda val: 'none' in val or 'n.a.' in val, vals))
@@ -86,7 +95,13 @@ if __name__ == '__main__':
         m = make_brackets(married)
         d["Joint"] = m
         s_dict[k] = d 
-    
+
+    # handle odd ball cases
+    s_dict['Colo.'] = make_flat_tax(.0463)
+    s_dict['Ind.'] = make_flat_tax(.033)
+    s_dict['Ill.'] = make_flat_tax(.0375)
+    s_dict['Mich.'] = make_flat_tax(.0425)
+
     for k in s_dict.keys():
         print ''
         print k 

@@ -216,7 +216,7 @@ class Taxer(object):
 
 if __name__ == '__main__':
     t = Taxer()
-    t.set_state_status('Tex.', 'Single')
+    t.set_state_status('Ill.', 'Single')
     salary = 130000
     net_income = t.net_income(salary, 'Single')
     print 'Annual Net Income:', net_income
