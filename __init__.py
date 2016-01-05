@@ -215,10 +215,12 @@ class Taxer(object):
 
 if __name__ == '__main__':
     t = Taxer()
-    t.set_state_status('Ill.', 'Single')
-    salary = 130000
+    t.set_state_status('Fla.', 'Single')
+    salary = 120000
     net_income = t.net_income(salary, 'Single')
     print 'Annual Net Income:', net_income
+    print 'State Taxes:', t.state_tax(salary)
+    print 'Federal Taxes:', t.federal_tax(salary)
     print 'Percentage of Annual Net Income:', net_income / salary
     print  'Biweekly Net Income:', net_income / 24
 
