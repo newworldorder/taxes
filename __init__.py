@@ -19,6 +19,31 @@ class Taxer(object):
         if os.path.exists(pkl_file):
             self.states_taxes = cPickle.load(open(pkl_file))
 
+    def _acc_taxes(self, gross_income, brackets):
+        """Accumulate taxes for the given bracket.
+
+        Args:
+            gross_income - the income of the filer
+            brackets - the income tax brackets
+
+        Returns:
+            a float representing the sum of the taxes applied to the gross_income
+        """
+        done = False
+        acc = 0
+        if 'None' == brackets:
+            return acc 
+        for (low, high) in brackets.keys():
+            if gross_income <= high:
+                done = True
+                diff  = gross_income - low + 1
+                acc += diff * brackets[(low, high)]
+            else:
+                diff = high - low + 1
+                acc += diff * brackets[(low, high)]
+            if done: break
+        return acc
+
     def _CA_tax_brackets(self):
         """Return CA tax brackets.
 
@@ -48,99 +73,6 @@ class Taxer(object):
         d[(1000000, sys.maxint)] = .133
 
         return d
-
-    def federal_tax(self, gross_income, status = 'Single'):
-        """Compute federal tax for `gross_income` and filing `stats`.
-
-        Args:
-            gross_income - the gross income of filer
-            status - the filing status of the filer
-
-        Returns:
-            a float representing the federal tax
-        """
-        status = self._check_status(status)
-        return self._acc_taxes(gross_income, self.federal_brackets[status])
-
-
-    def federal_tax_brackets(self, federal_brackets):
-        """Set the federal tax brackets.
-
-        Args:
-            federal_brackets - dictionary containing status values as keys and
-                               brackets (dictionaries) as values
-        """
-        self.federal_brackets = federal_brackets
-
-    def net_income(self, gross_income, status = 'Single'):
-        """Return the net income associated with `gross_income` and `status`.
-
-        Args:
-            gross_income - the gross income of the filer
-            status - the filing status of the filer
-
-        Returns:
-            a float representing the net income after taxes have been removed
-        """
-        total_tax = self.federal_tax(gross_income, status) + self.state_tax(gross_income)
-        return gross_income - total_tax
-
-    def set_state_status(self, state, status):
-        state_map = {}
-        if state not in self.states_taxes:
-            print state + ' does not exist'
-            return False
-        state_map = self.states_taxes[state]
-
-        if status not in state_map:
-            print status + 'does not exist'
-            return False
-        self.state_brackets = state_map[status]
-
-    def state_tax(self, gross_income):
-        """Comptue state tax for `gross_income`.
-
-        Args:
-            gross_income - the gross income of the filer
-
-        Returns:
-            a float representing the state tax
-        """
-        return self._acc_taxes(gross_income, self.state_brackets)
-
-    def state_tax_brackets(self, state_brackets):
-        """Set the state tax brackets.
-
-        Args:
-            state_brackets - a dictionary containing dollar ranges in a tuple as
-                             the key and the tax rate as the value
-        """
-        self.state_brackets = state_brackets
-
-    def _acc_taxes(self, gross_income, brackets):
-        """Accumulate taxes for the given bracket.
-
-        Args:
-            gross_income - the income of the filer
-            brackets - the income tax brackets
-
-        Returns:
-            a float representing the sum of the taxes applied to the gross_income
-        """
-        done = False
-        acc = 0
-        if 'None' == brackets:
-            return acc 
-        for (low, high) in brackets.keys():
-            if gross_income <= high:
-                done = True
-                diff  = gross_income - low + 1
-                acc += diff * brackets[(low, high)]
-            else:
-                diff = high - low + 1
-                acc += diff * brackets[(low, high)]
-            if done: break
-        return acc
 
     def _check_status(self, status):
         """Ensure a valid filing status is used.
@@ -213,6 +145,73 @@ class Taxer(object):
         d['Head'] = head
 
         return d
+
+    def federal_tax(self, gross_income, status = 'Single'):
+        """Compute federal tax for `gross_income` and filing `stats`.
+
+        Args:
+            gross_income - the gross income of filer
+            status - the filing status of the filer
+
+        Returns:
+            a float representing the federal tax
+        """
+        status = self._check_status(status)
+        return self._acc_taxes(gross_income, self.federal_brackets[status])
+
+    def federal_tax_brackets(self, federal_brackets):
+        """Set the federal tax brackets.
+
+        Args:
+            federal_brackets - dictionary containing status values as keys and
+                               brackets (dictionaries) as values
+        """
+        self.federal_brackets = federal_brackets
+
+    def net_income(self, gross_income, status = 'Single'):
+        """Return the net income associated with `gross_income` and `status`.
+
+        Args:
+            gross_income - the gross income of the filer
+            status - the filing status of the filer
+
+        Returns:
+            a float representing the net income after taxes have been removed
+        """
+        total_tax = self.federal_tax(gross_income, status) + self.state_tax(gross_income)
+        return gross_income - total_tax
+
+    def set_state_status(self, state, status):
+        state_map = {}
+        if state not in self.states_taxes:
+            print state + ' does not exist'
+            return False
+        state_map = self.states_taxes[state]
+
+        if status not in state_map:
+            print status + 'does not exist'
+            return False
+        self.state_brackets = state_map[status]
+
+    def state_tax(self, gross_income):
+        """Comptue state tax for `gross_income`.
+
+        Args:
+            gross_income - the gross income of the filer
+
+        Returns:
+            a float representing the state tax
+        """
+        return self._acc_taxes(gross_income, self.state_brackets)
+
+    def state_tax_brackets(self, state_brackets):
+        """Set the state tax brackets.
+
+        Args:
+            state_brackets - a dictionary containing dollar ranges in a tuple as
+                             the key and the tax rate as the value
+        """
+        self.state_brackets = state_brackets
 
 if __name__ == '__main__':
     t = Taxer()

@@ -9,27 +9,49 @@ import sys
 
 ODD_BALLS = set(['Ill.', 'Colo.', 'Mich.', 'Ind.'])
 
-def make_flat_tax(tax_rate):
-    return {'Single':{(0, sys.maxint): tax_rate}, 
-            'Joint':{(0, sys.maxint): tax_rate}}
-
-def no_vals(vals):
-    return all(map(lambda val: 'none' in val or 'n.a.' in val, vals))
-    
-def convert_rates(rates):
-    l = []
-    for rate in rates:
-        l.append(float(rate[:-1]) * .01)
-    return l 
-
 def convert_brackets(brackets):
+    """Convert bracket dollar values to integers. An example 
+    conversion is as follows: before: $32,322, after: 32322
+
+    Args:
+      brackets - a list of strings representing dollar amounts
+
+    Returns:
+      a list containing integer representations of the brackets
+    """
     l = []
     for bracket in brackets:
         l.append(int(bracket[1:].replace(',', '')))
     l.append(sys.maxint)
     return l 
 
+def convert_rates(rates):
+    """Convert the rates into decimal format.  An example 
+    conversion is as follows: before: 3.2%, after: .032
+
+    Args:
+      rates - a list of string represented percentages
+
+    Returns:
+      a list containing float value less than 1 
+    """
+    l = []
+    for rate in rates:
+        l.append(float(rate[:-1]) * .01)
+    return l 
+
 def make_brackets(status):
+    """Create brackets that map to rates. 
+
+    Args:
+      status - tuple with list of textual rates
+               and a list of textual brackets/
+               dollar amounts
+    
+    Returns:
+      an ordered dictionary that maps brackets to
+      rates 
+    """
     rates = convert_rates(status[0])
     brackets = convert_brackets(status[1])
     bracket_rows = zip(brackets, brackets[1:])
@@ -39,11 +61,48 @@ def make_brackets(status):
     s = map_bracket2rate(rows, rates)
     return s
 
+def make_flat_tax(tax_rate):
+    """Create a tax rate for all brackets. 
+    
+    Args:
+      tax_rate - the float value (< 1) that is 
+                 the tax rate to applied for all
+                 dollar amounts 
+
+    Returns:
+      a dictionary containing a tax rate for all 
+      dollar amounts for all statuses 
+    """
+    return {'Single':{(0, sys.maxint): tax_rate}, 
+            'Joint':{(0, sys.maxint): tax_rate}}
+
 def map_bracket2rate(bracket_rows, rates):
+    """Associate bracket entries to tax rates. 
+
+    Args: 
+      bracket_rows - list of tuples of dollar amounts
+                     represented as integers 
+    
+    Returns:
+      a dictionary containing mappings from a bracket
+      to a tax rate (float)  
+    """
     d = OrderedDict() 
     for i in range(len(rates)):
             d[bracket_rows[i]] = rates[i]
     return d 
+
+def no_vals(vals):
+    """Checks if all values are `none` or `n.a.`
+
+    Args:
+      vals - a list of string values 
+    
+    Returns:
+      True if all values contain `none` or `n.a.`,
+      False otherwise 
+    """
+    return all(map(lambda val: 'none' in val or 'n.a.' in val, vals))
 
 if __name__ == '__main__':
     filename = 'state_tax_parsed.output'
