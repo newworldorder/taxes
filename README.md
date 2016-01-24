@@ -4,9 +4,11 @@ This module computes federal taxes and state taxes for a given gross salary.
 # Usage 
 ```
 from taxes import Taxer
+
 federal_status = 'Joint'
 state_status = 'Joint'
 state = 'Calif.'
+
 t = Taxer(state, federal_status, state_status)
 salary = 30000
 federal_tax = t.federal_tax(salary)
