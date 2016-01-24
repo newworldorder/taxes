@@ -6,7 +6,8 @@ This module computes federal taxes and state taxes for a given gross salary.
 from taxes import Taxer
 federal_status = 'Joint'
 state_status = 'Joint'
-t = Taxer('Calif.', federal_status, state_status)
+state = 'Calif.'
+t = Taxer(state, federal_status, state_status)
 salary = 30000
 federal_tax = t.federal_tax(salary)
 state_tax = t.state_tax(salary)
