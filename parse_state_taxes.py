@@ -126,7 +126,7 @@ if __name__ == '__main__':
                 married_rate = []
                 married_bracket = []
             continue 
-        if line[0].isalpha():
+        if line[0].isalpha() and ',' not in tokens[0]:
             parts = tokens[0].split()
             state = parts[0]
         if tokens[1] != '':

@@ -12,12 +12,24 @@ FED_L6 = .35
 FED_L7 = .396
 
 class Taxer(object):
-    def __init__(self):
-        self.federal_brackets = self._federal_tax_brackets()
-        self.state_brackets = self._CA_tax_brackets()
+    def __init__(self, state = 'Calif.', status = 'Single'):
+        """Initialize object.
+
+        Args:
+            state - the state of the filer
+            status - the filing status of the filer
+        """
         pkl_file = 'state_taxes.pkl'
         if os.path.exists(pkl_file):
             self.states_taxes = cPickle.load(open(pkl_file))
+        self.possible_states = sorted(self.states_taxes.keys())
+        ok = self._set_state_status(state, status)
+        if not ok:
+            sys.stderr.write('\nInvalid state or status, quitting...\n')
+            exit()
+        self.state = state
+        self.status = status 
+        self._set_federal_tax_brackets(status)
 
     def _acc_taxes(self, gross_income, brackets):
         """Accumulate taxes for the given bracket.
@@ -44,51 +56,7 @@ class Taxer(object):
             if done: break
         return acc
 
-    def _CA_tax_brackets(self):
-        """Return CA tax brackets.
-
-        Source: http://www.bankrate.com/finance/taxes/state-taxes-california.aspx (2015)
-
-        1 percent on the first $7,749 of taxable income.
-        2 percent on taxable income between $7,750 and $18,371.
-        4 percent on taxable income between $18,372 and $28,995.
-        6 percent on taxable income between $28,996 and $40,250.
-        8 percent on taxable income between $40,251 and $50,869.
-        9.3 percent on taxable income between $50,870 and 259,844.
-        10.3 percent on taxable income between $259,845 and 311,812.
-        11.3 percent on taxable income between $311,813 and $519,687.
-        12.3 percent on taxable income of $519,688 and above.
-        A 1 percent surcharge, the Mental Health Services Tax, is collected on taxable incomes of $1 million or more,
-        """
-        d = OrderedDict()
-        d[(1, 7749)] = .01
-        d[(7750, 18371)] = .02
-        d[(18372, 28995)] = .04
-        d[(28996, 40250)] = .06
-        d[(40251, 50869)] = .08
-        d[(50870, 259844)] = .093
-        d[(259845, 311812)] = .103
-        d[(311813, 519687)] = .113
-        d[(519688, 999999)] = .123
-        d[(1000000, sys.maxint)] = .133
-
-        return d
-
-    def _check_status(self, status):
-        """Ensure a valid filing status is used.
-
-        Args:
-            status - the filing status of the filer
-
-        Returns:
-            a string that is a valid filing status value: "Single", "Joint", "Separate", or "Head"
-        """
-        if status not in self.federal_brackets:
-            sys.stderr.write(status + ' is not a valid status, setting it to Single')
-            status = 'Single'
-        return status
-
-    def _federal_tax_brackets(self):
+    def _set_federal_tax_brackets(self, status):
         """Return the federal tax brackets.
 
         Source: http://www.efile.com/tax-service/tax-calculator/tax-brackets/   (2015)
@@ -141,86 +109,78 @@ class Taxer(object):
         d = dict()
         d['Single'] = single
         d['Joint'] = joint
-        d['Separate'] = separate
-        d['Head'] = head
+        # may support in next version 
+        #d['Separate'] = separate
+        #d['Head'] = head
 
-        return d
-
-    def federal_tax(self, gross_income, status = 'Single'):
-        """Compute federal tax for `gross_income` and filing `stats`.
+        self.federal_brackets = d[status]
+        
+    def _set_state_status(self, state, status):
+        """Set the state tax according to the filer's status.
 
         Args:
-            gross_income - the gross income of filer
+            state - the state of the filer
             status - the filing status of the filer
 
         Returns:
-            a float representing the federal tax
+            False if the state or status doesn't exist, True otherwise
         """
-        status = self._check_status(status)
-        return self._acc_taxes(gross_income, self.federal_brackets[status])
-
-    def federal_tax_brackets(self, federal_brackets):
-        """Set the federal tax brackets.
-
-        Args:
-            federal_brackets - dictionary containing status values as keys and
-                               brackets (dictionaries) as values
-        """
-        self.federal_brackets = federal_brackets
-
-    def net_income(self, gross_income, status = 'Single'):
-        """Return the net income associated with `gross_income` and `status`.
-
-        Args:
-            gross_income - the gross income of the filer
-            status - the filing status of the filer
-
-        Returns:
-            a float representing the net income after taxes have been removed
-        """
-        total_tax = self.federal_tax(gross_income, status) + self.state_tax(gross_income)
-        return gross_income - total_tax
-
-    def set_state_status(self, state, status):
         state_map = {}
+        print sorted(self.states_taxes.keys())
         if state not in self.states_taxes:
-            print state + ' does not exist'
+            sys.stderr.write(state + ' does not exist') 
             return False
         state_map = self.states_taxes[state]
 
         if status not in state_map:
-            print status + 'does not exist'
+            sys.stderr.write(status + ' does not exist') 
             return False
-        self.state_brackets = state_map[status]
 
-    def state_tax(self, gross_income):
-        """Comptue state tax for `gross_income`.
+        self.state_brackets = state_map[status]
+       
+        return True 
+
+    def federal_tax(self, gross_income):
+        """Compute federal tax for `gross_income`.
+
+        Args:
+            gross_income - the gross income of filer
+
+        Returns:
+            a float representing the federal tax
+        """           
+        return self._acc_taxes(gross_income, self.federal_brackets)
+
+    def net_income(self, gross_income):
+        """Return the net income associated with `gross_income`.
 
         Args:
             gross_income - the gross income of the filer
 
         Returns:
-            a float representing the state tax
+            a float representing the net income after taxes have been removed
+        """
+        total_tax = self.federal_tax(gross_income) + self.state_tax(gross_income)
+        return gross_income - total_tax
+
+    def state_tax(self, gross_income):
+        """Compute state tax for `gross_income`.
+
+        Args:
+            gross_income - the gross income for filer
+
+        Returns:
+            a float representing the state tax amount
         """
         return self._acc_taxes(gross_income, self.state_brackets)
 
-    def state_tax_brackets(self, state_brackets):
-        """Set the state tax brackets.
-
-        Args:
-            state_brackets - a dictionary containing dollar ranges in a tuple as
-                             the key and the tax rate as the value
-        """
-        self.state_brackets = state_brackets
-
 if __name__ == '__main__':
-    t = Taxer()
-    t.set_state_status('Fla.', 'Single')
-    salary = 120000
-    net_income = t.net_income(salary, 'Single')
+    t = Taxer('Calif.', 'Joint')
+    salary = 30000
+    net_income = t.net_income(salary)
     print 'Annual Net Income:', net_income
     print 'State Taxes:', t.state_tax(salary)
     print 'Federal Taxes:', t.federal_tax(salary)
     print 'Percentage of Annual Net Income:', net_income / salary
-    print  'Biweekly Net Income:', net_income / 24
+    print 'Biweekly Net Income:', net_income / 24
 
