@@ -16,7 +16,7 @@ net_income = t.net_income(salary)
 ##### `federal_status` values
 - `Single` - filing as not married
 - `Joint` - filing as married 
-- `Separate` - filing as married by separated (e.g., widow)
+- `Separate` - filing as separate though married 
 - `Head` - filing as head of the household
 
 ##### `state_status` values
