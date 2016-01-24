@@ -15,6 +15,7 @@ net_income = t.net_income(salary)
 ## `status` Values
 - `Single` - filing as not married 
 - `Joint` - filing as married
+
 ## `state` Values 
 ```
 Ala.
