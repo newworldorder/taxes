@@ -9,7 +9,6 @@ __pycache__/
 *~
 
 # ouptut files
-*.pkl
 *.output
 
 # Distribution / packaging

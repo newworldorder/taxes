@@ -12,24 +12,30 @@ FED_L6 = .35
 FED_L7 = .396
 
 class Taxer(object):
-    def __init__(self, state = 'Calif.', status = 'Single'):
+    def __init__(self, state = 'Calif.', federal_status = 'Single', 
+                 state_status = 'Single'):
         """Initialize object.
 
         Args:
             state - the state of the filer
-            status - the filing status of the filer
+            federal_status - the filer's status at the federal level
+            state_status - the filer's status at the state level
         """
         pkl_file = 'state_taxes.pkl'
         if os.path.exists(pkl_file):
             self.states_taxes = cPickle.load(open(pkl_file))
         self.possible_states = sorted(self.states_taxes.keys())
-        ok = self._set_state_status(state, status)
+        ok = self._set_state_status(state, state_status)
         if not ok:
-            sys.stderr.write('\nInvalid state or status, quitting...\n')
+            sys.stderr.write('\nInvalid state or state status, quitting...\n')
             exit()
         self.state = state
-        self.status = status 
-        self._set_federal_tax_brackets(status)
+        self.state_status = state_status 
+        ok = self._set_federal_tax_brackets(federal_status)
+        if not ok:
+            sys.stderr.write('\nInvalid federal status provided, quitting...\n')
+            exit()
+        self.federal_status = federal_status
 
     def _acc_taxes(self, gross_income, brackets):
         """Accumulate taxes for the given bracket.
@@ -109,12 +115,15 @@ class Taxer(object):
         d = dict()
         d['Single'] = single
         d['Joint'] = joint
-        # may support in next version 
-        #d['Separate'] = separate
-        #d['Head'] = head
+        d['Separate'] = separate
+        d['Head'] = head
 
-        self.federal_brackets = d[status]
+        if status not in d:
+            return False
         
+        self.federal_brackets = d[status]
+        return True
+
     def _set_state_status(self, state, status):
         """Set the state tax according to the filer's status.
 
@@ -126,7 +135,6 @@ class Taxer(object):
             False if the state or status doesn't exist, True otherwise
         """
         state_map = {}
-        print sorted(self.states_taxes.keys())
         if state not in self.states_taxes:
             sys.stderr.write(state + ' does not exist') 
             return False
@@ -175,7 +183,7 @@ class Taxer(object):
         return self._acc_taxes(gross_income, self.state_brackets)
 
 if __name__ == '__main__':
-    t = Taxer('Calif.', 'Joint')
+    t = Taxer('Calif.', 'Joint', 'Joint')
     salary = 30000
     net_income = t.net_income(salary)
     print 'Annual Net Income:', net_income
