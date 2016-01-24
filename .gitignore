@@ -9,7 +9,6 @@ __pycache__/
 *~
 
 # ouptut files
-*.output
 
 # Distribution / packaging
 .Python
