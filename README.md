@@ -1,6 +1,6 @@
 # taxes
 
-This module computes federal taxes and state taxes for a given gross salary. 
+This wonderful module computes federal taxes and state taxes for a given gross salary. 
 # Usage 
 ```
 from taxes import Taxer
